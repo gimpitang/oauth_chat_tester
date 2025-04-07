@@ -1,59 +1,97 @@
 <template>
     <v-container>
         <v-row justify="center">
-            <v-col cols="12" sm="4" md="6">
+            <v-col md="4">
                 <v-card>
-                    <v-card-title class="text-h5 text-center">로그인</v-card-title>
+                    <v-card-title class="text-h5 text-center">
+                        로그인
+                    </v-card-title>
                     <v-card-text>
-                        <v-form @submit.prevent="doLogin">
-                            <v-text-field 
-                            label="email"
-                            v-model="email"
-                            type="email"
-                            required
-                            ></v-text-field>
-                            
-                            <v-text-field 
-                            label="password"
-                            v-model="password"
-                            type="password"
-                            required
+                        <v-form>
+                            <v-text-field
+                                label="email"
+                                v-model="email"
                             >
                             </v-text-field>
-                            <v-btn type="submit" color="primary" block>로그인</v-btn>
+                            <v-text-field
+                                label="패스워드"
+                                v-model="password"
+                                type="password"
+                            >
+                            </v-text-field>
+                            <v-btn type="button" color="primary" block @click="memberLogin()">로그인</v-btn>
                         </v-form>
+                        <br>
+                        <v-row>
+                            <v-col cols="6" class="d-flex justify-center">
+                                <img
+                                    src="@/assets/google_login.png"
+                                    style="max-height:40px; width:auto;"
+                                    @click="googleLogin()"
+                                />
+                            </v-col>
+                            <v-col cols="6" class="d-flex justify-center">
+                                <img
+                                    src="@/assets/btnG_완성형.png"
+                                    style="max-height:40px; width:auto;"
+                                    @click="naverLogin()"
+                                />
+                            </v-col>
+                        </v-row>
                     </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
-
     </v-container>
 </template>
 
 <script>
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
+
 export default{
     data(){
         return{
-            email: "",
+            email : "",
             password: "",
+
+            googleUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+            googleClientId: "",
+
+            googleRedirectUrl: "http://localhost:3000/member/google/redirect",
+            // openid는 요청하지 않아도 기본적으로 제공. email과 profile은 요청시 제공.
+            googleScope: "openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.phonenumbers.read",
+
+            naverUrl: "https://nid.naver.com/oauth2.0/authorize",
+            naverClientId: "",
+            naverRedirectUrl: "http://localhost:3000/member/naver/redirect",
+            naverScope: "id email gender birthyear birthday age mobile name"
         }
     },
     methods:{
-        async doLogin(){
-            const loginData = {email:this.email, password:this.password};
-            const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/member/doLogin`, loginData);
+        async memberLogin(){
+            const loginData = {
+                email: this.email,
+                password: this.password
+            }
+            const response = await axios.post("http://localhost:8080/member/doLogin", loginData);
             const token = response.data.token;
-            const role = jwtDecode(token).role;
-            const email = jwtDecode(token).sub;
+            const refreshToken = response.data.refreshToken
             localStorage.setItem("token", token);
-            localStorage.setItem("role", role);
-            localStorage.setItem("email", email);
-            window.location.href="/";
-        }
+            localStorage.setItem("refreshToken", refreshToken);
+            window.location.href = "/";
+        },
+        googleLogin(){
+            const auth_uri = `${this.googleUrl}?client_id=${this.googleClientId}&redirect_uri=${this.googleRedirectUrl}&response_type=code&scope=${this.googleScope}`;
+            window.location.href = auth_uri;
+        },
+        naverLogin(){
+            const auth_uri = `${this.naverUrl}?client_id=${this.naverClientId}&redirect_uri=${this.naverRedirectUrl}&response_type=code&scope=${this.naverScope}`;
+            window.location.href = auth_uri;
+        },
+
+        // googleServerLogin(){
+        //     window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        // }
     }
 }
-
-
 </script>

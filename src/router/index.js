@@ -6,6 +6,8 @@ import SimpleWebsocket from "@/views/SimpleWebsocket.vue"
 import StompChatPage from "@/views/StompChatPage.vue"
 import GroupChattingList from "@/views/GroupChattingList.vue"
 import MyChatPage from "@/views/MyChatPage.vue"
+import GoogleRedirect from "@/views/GoogleRedirect.vue"
+import NaverRedirect from "@/views/NaverRedirect.vue"
 
 const routes = [
     {
@@ -42,6 +44,14 @@ const routes = [
         path:'/my/chat/page',
         name: 'MyChatPage',
         component: MyChatPage
+    },
+    {
+        path: "/member/google/redirect",
+        component: GoogleRedirect
+    },
+    {
+        path: "/member/naver/redirect",
+        component: NaverRedirect
     }
 
 ]
