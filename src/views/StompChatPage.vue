@@ -11,17 +11,18 @@
                             <div 
                              v-for="(msg, index) in messages"
                              :key="index"
-                             :class="['chat-message', msg.senderEmail ===this.senderEmail ? 'sent' : 'received' ]"
+                             :class="['chat-message', msg.memberId === memberId ? 'sent' : 'received' ]"
                             >
-                                <strong>{{ msg.senderEmail }}: </strong> {{ msg.message }}
+                                <strong>{{ msg.memberNickname }}: </strong> {{ msg.message }}
                             </div>
                         </div>
                         <v-text-field
                             v-model="newMessage"
                             label="메시지 입력"
                             @keyup.enter="sendMessage"
+                            :disabled="!isLoggedIn"
                         />
-                        <v-btn color="primary" block @click="sendMessage">전송</v-btn>
+                        <v-btn color="primary" block @click="sendMessage":disabled="!isLoggedIn">전송</v-btn>
                     </v-card-text>
                 </v-card>
 
@@ -44,6 +45,8 @@ export default{
             newMessage: "",
             stompClient: null,
             token: "",
+            memberId: null,
+            memberNickname: "",
             senderEmail: null,
             roomId: null,
         }
