@@ -105,7 +105,10 @@ export default{
 
             this.stompClient.send(
                 `/publish/${this.roomId}`,
-                {},
+                {
+                    'member-id': this.memberId,
+                    'member-nickname': this.nickname
+                },
                 JSON.stringify(message)
             );
             this.newMessage = '';

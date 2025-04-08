@@ -8,6 +8,8 @@ import GroupChattingList from "@/views/GroupChattingList.vue"
 import MyChatPage from "@/views/MyChatPage.vue"
 import GoogleRedirect from "@/components/GoogleRedirect.vue"
 import NaverRedirect from "@/components/NaverRedirect.vue"
+import ChatRoomCreatePage from "@/views/ChatRoomCreatePage.vue"
+import ChatRoomJoinPage from "@/views/ChatRoomJoinPage.vue"
 
 const routes = [
     {
@@ -52,7 +54,17 @@ const routes = [
     {
         path: "/member/naver/redirect",
         component: NaverRedirect
-    }
+    },
+    {
+        path: '/chat/create',
+        name: 'ChatRoomCreate',
+        component: ChatRoomCreatePage
+      },
+      {
+        path: '/chat/join',
+        name: 'ChatRoomJoin',
+        component: ChatRoomJoinPage
+      }
 
 ]
 
