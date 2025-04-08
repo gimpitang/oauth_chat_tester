@@ -1,6 +1,6 @@
 <template>
     <div>
-        카카오 로그인 진행중...
+        네이버버 로그인 진행중...
     </div>
 </template>
 

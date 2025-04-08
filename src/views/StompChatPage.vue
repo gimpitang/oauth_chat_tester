@@ -22,7 +22,7 @@
                             @keyup.enter="sendMessage"
                             :disabled="!isLoggedIn"
                         />
-                        <v-btn color="primary" block @click="sendMessage":disabled="!isLoggedIn">전송</v-btn>
+                        <v-btn color="primary" block @click="sendMessage" :disabled ="!isLoggedIn">전송</v-btn>
                     </v-card-text>
                 </v-card>
 
@@ -42,20 +42,26 @@ export default{
     data(){
         return {
             messages: [],
-            newMessage: "",
+            newMessage: '',
             stompClient: null,
-            token: "",
+            token: '',
             memberId: null,
-            memberNickname: "",
-            senderEmail: null,
+            nickname: '',
             roomId: null,
+            isLoggedIn: false,
         }
     },
     async created(){
-        this.senderEmail = localStorage.getItem("email");
+        this.token = localStorage.getItem('token');
+        this.memberId = localStorage.getItem('memberId');
+        this.nickname = localStorage.getItem('nickname');
+        this.isLoggedIn = !!this.token;
+
         this.roomId = this.$route.params.roomId;
-        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
+        // 메시지 조회
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
         this.messages = response.data;
+        
         this.connectWebsocket();
     },
     // 사용자가 현재 라우트에서 다른 라우트로 이동하려고 할때 호출되는 훅함수
@@ -71,29 +77,38 @@ export default{
         connectWebsocket(){
             if(this.stompClient && this.stompClient.connected) return;
             // sockjs는 websocket을 내장한 향상된 js 라이브러리. http엔드포인트 사용.
-            const sockJs = new SockJS(`${process.env.VUE_APP_API_BASE_URL}/connect`)
+            const sockJs = new SockJS(`${import.meta.env.VITE_API_BASE_URL || process.env.VUE_APP_API_BASE_URL}/connect`)
             this.stompClient = Stomp.over(sockJs);
-            this.token = localStorage.getItem("token");
-            this.stompClient.connect({
-                Authorization: `Bearer ${this.token}`
-            },
-                ()=>{
+            // this.token = localStorage.getItem("token"); 위에서 갖고와서 주석처리함.
+
+            const headers = {};
+            if (this.token) {
+                headers.Authorization = `Bearer ${this.token}`;
+            }
+            
+            this.stompClient.connect(headers,()=>{
                     this.stompClient.subscribe(`/topic/${this.roomId}`, (message) => {
                         const parseMessage = JSON.parse(message.body);
                         this.messages.push(parseMessage);
                         this.scrollToBottom();
-                    },{Authorization: `Bearer ${this.token}`})
-                }
-            )
+                    });
+                });
         },
         sendMessage(){
-            if(this.newMessage.trim() === "")return;
+            if (!this.newMessage.trim()) return;
+
             const message = {
-                senderEmail: this.senderEmail,
-                message: this.newMessage
-            }
-            this.stompClient.send(`/publish/${this.roomId}`, JSON.stringify(message));
-            this.newMessage = ""
+                memberId: this.memberId,
+                memberNickname: this.nickname,
+                message: this.newMessage,
+            };
+
+            this.stompClient.send(
+                `/publish/${this.roomId}`,
+                {},
+                JSON.stringify(message)
+            );
+            this.newMessage = '';
         },
         scrollToBottom(){
             this.$nextTick(()=>{
@@ -102,9 +117,7 @@ export default{
             })
         },
         async disconnectWebSocket(){
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/${this.roomId}/read`);
-            if(this.stompClient && this.stompClient.connected){
-                this.stompClient.unsubscribe(`/topic/${this.roomId}`);
+            if (this.stompClient && this.stompClient.connected) {
                 this.stompClient.disconnect();
             }
         },
@@ -113,20 +126,19 @@ export default{
 }
 </script>
 <style>
-.chat-box{
-    height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
+.chat-box {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
 }
-
-.chat-message{
-    margin-bottom:10px;
+.chat-message {
+  margin-bottom: 10px;
 }
-.sent{
-    text-align:right;
+.sent {
+  text-align: right;
 }
-.received{
-    text-align:left;
+.received {
+  text-align: left;
 }
 </style>
