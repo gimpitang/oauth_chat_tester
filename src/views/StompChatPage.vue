@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <v-container>
         <v-row justify="center">
             <v-col cols="12" md="8">
@@ -53,13 +53,11 @@ export default{
     },
     async created(){
         this.token = localStorage.getItem('token');
-        this.memberId = localStorage.getItem('memberId');
-        this.nickname = localStorage.getItem('nickname');
         this.isLoggedIn = !!this.token;
 
         this.roomId = this.$route.params.roomId;
         // 메시지 조회
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || process.env.VUE_APP_API_BASE_URL}/chat/history/${this.roomId}`);
+        const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/streaming-service/chat/history/${this.roomId}`);
         this.messages = response.data;
         
         this.connectWebsocket();
@@ -77,7 +75,7 @@ export default{
         connectWebsocket(){
             if(this.stompClient && this.stompClient.connected) return;
             // sockjs는 websocket을 내장한 향상된 js 라이브러리. http엔드포인트 사용.
-            const sockJs = new SockJS(`${import.meta.env.VITE_API_BASE_URL || process.env.VUE_APP_API_BASE_URL}/connect`)
+            const sockJs = new SockJS(`${process.env.VUE_APP_API_BASE_URL}/streaming-service/connect`)
             this.stompClient = Stomp.over(sockJs);
             // this.token = localStorage.getItem("token"); 위에서 갖고와서 주석처리함.
 
@@ -94,25 +92,18 @@ export default{
                     });
                 });
         },
-        sendMessage(){
+        sendMessage() {
             if (!this.newMessage.trim()) return;
 
             const message = {
-                memberId: this.memberId,
-                memberNickname: this.nickname,
                 message: this.newMessage,
+                type: 'TALK',
             };
 
-            this.stompClient.send(
-                `/publish/${this.roomId}`,
-                {
-                    'member-id': this.memberId,
-                    'member-nickname': this.nickname
-                },
-                JSON.stringify(message)
-            );
+            this.stompClient.send(`/publish/${this.roomId}`, {}, JSON.stringify(message));
             this.newMessage = '';
-        },
+            }
+            ,
         scrollToBottom(){
             this.$nextTick(()=>{
                 const chatBox = this.$el.querySelector(".chat-box");
@@ -144,4 +135,4 @@ export default{
 .received {
   text-align: left;
 }
-</style>
+</style> -->

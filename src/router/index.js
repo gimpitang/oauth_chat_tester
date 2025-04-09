@@ -3,7 +3,7 @@ import MemberCreate from "@/views/MemberCreate.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import MemberList from "@/views/MemberList.vue"
 import SimpleWebsocket from "@/views/SimpleWebsocket.vue"
-import StompChatPage from "@/views/StompChatPage.vue"
+// import StompChatPage from "@/views/StompChatPage.vue"
 import GroupChattingList from "@/views/GroupChattingList.vue"
 import MyChatPage from "@/views/MyChatPage.vue"
 import GoogleRedirect from "@/components/GoogleRedirect.vue"
@@ -35,7 +35,7 @@ const routes = [
     {
         path:'/chatpage/:roomId',
         name: 'StompChatPage',
-        component: StompChatPage
+        component: ChatRoomJoinPage
     },
     {
         path:'/groupchatting/list',

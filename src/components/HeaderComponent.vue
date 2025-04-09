@@ -5,7 +5,6 @@
                 <v-col class="d-flex justify-start">
                     <v-btn :to="{path:'/member/list'}">회원목록</v-btn>
                     <v-btn :to="{path:'/groupchatting/list'}">채팅방목록</v-btn>
-                    <v-btn :to="{path:'/chat/create'}">채팅방 생성</v-btn>
                     <v-btn :to="{path:'/chat/join'}">채팅방 참여</v-btn>
                 </v-col>
                 <v-col class="text-center">
