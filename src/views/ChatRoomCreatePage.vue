@@ -20,23 +20,16 @@
       };
     },
     methods: {
+        async joinChatRoom(roomId){
+            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/${roomId}/join`);
+            this.$router.push(`/chatpage/${roomId}`);
+        },
       async createChatRoom() {
-        const memberId = localStorage.getItem('memberId');
-        const isStreamer = localStorage.getItem('isStreamer');
-        const nickname = localStorage.getItem('nickname');
   
         try {
           await axios.post(
-            `${process.env.VUE_APP_API_BASE_URL}/chat/room/create`,
-            { streamingId: this.streamingId },
-            {
-              headers: {
-                'X-User-Id': memberId,
-                'X-User-Streamer': isStreamer,
-                'X-User-Nickname': nickname,
-                'Content-Type': 'application/json',
-              },
-            }
+            `${process.env.VUE_APP_API_BASE_URL}/chat/room/create?roomName=${this.streamingId}`,
+            { streamingId: this.streamingId }
           );
           alert('채팅방 생성 성공!');
         } catch (error) {
