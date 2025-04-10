@@ -15,7 +15,7 @@ export default{
     },
     methods:{
         async sendCodeToServer(code){
-            const response = await axios.post("http://localhost:8080/member-service/member/google/doLogin", {code});
+            const response = await axios.post(`${process.env.VUE_APP_API_BASE_URL}/member-service/member/google/doLogin`, {code});
             const token = response.data.token;
             const refreshToken = response.data.refreshToken;
             localStorage.setItem("token", token);

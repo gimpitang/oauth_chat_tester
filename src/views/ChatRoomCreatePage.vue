@@ -21,14 +21,14 @@
     },
     methods: {
         async joinChatRoom(roomId){
-            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/chat/room/join/${roomId}`);
+            await axios.post(`${process.env.VUE_APP_API_BASE_URL}/streaming-service/chat/room/join/${roomId}`);
             this.$router.push(`/chatpage/${roomId}`);
         },
       async createChatRoom() {
   
         try {
           await axios.post(
-            `${process.env.VUE_APP_API_BASE_URL}/chat/room/create?roomName=${this.streamingId}`,
+            `${process.env.VUE_APP_API_BASE_URL}/streaming-service/chat/room/create?roomName=${this.streamingId}`,
             { streamingId: this.streamingId }
           );
           alert('채팅방 생성 성공!');
