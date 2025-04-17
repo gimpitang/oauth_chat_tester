@@ -1,6 +1,7 @@
 <template>
-    <div>
-        네이버버 로그인 진행중...
+    <div class="loading-container">
+        <img src="@/assets/홈페이지 로그인 중 화면.gif" alt="로딩 중..." class="loading-gif" />
+        <p>구글 로그인 진행중...</p>
     </div>
 </template>
 
@@ -20,8 +21,24 @@ export default{
             const refreshToken = response.data.refreshtoken;
             localStorage.setItem("token", token);
             localStorage.setItem("refreshToken", refreshToken);
+            setTimeout(() => {
             window.location.href = "/";
+            }, 100);
         }
     }
 }
 </script>
+<style scoped>
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+.loading-gif {
+  width: 1200px;
+  height: 1000px;
+  margin-bottom: 1rem;
+}
+</style>

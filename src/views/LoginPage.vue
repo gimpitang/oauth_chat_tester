@@ -1,64 +1,59 @@
 <template>
-    <v-container>
-        <v-row justify="center">
-            <v-col md="4">
-                <v-card>
-                    <v-card-title class="text-h5 text-center">
-                        로그인
-                    </v-card-title>
-                    <v-card-text>
-                        <v-form>
-                            <v-text-field
-                                label="email"
-                                v-model="email"
-                            >
-                            </v-text-field>
-                            <v-text-field
-                                label="패스워드"
-                                v-model="password"
-                                type="password"
-                            >
-                            </v-text-field>
-                            <v-btn type="button" color="primary" block @click="memberLogin()">로그인</v-btn>
-                        </v-form>
-                        <br>
-                        <v-row>
-                            <v-col cols="6" class="d-flex justify-center">
-                                <img
-                                    src="@/assets/google_login.png"
-                                    style="max-height:40px; width:auto;"
-                                    @click="googleLogin()"
-                                />
-                            </v-col>
-                            <v-col cols="6" class="d-flex justify-center">
-                                <img
-                                    src="@/assets/btnG_완성형.png"
-                                    style="max-height:40px; width:auto;"
-                                    @click="naverLogin()"
-                                />
-                            </v-col>
-                        </v-row>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-        </v-row>
+    <v-container fluid class="login-container d-flex align-center justify-center fill-height">
+      <v-card class="pa-6 login-card" max-width="400" elevation="10">
+        <v-card-title class="text-h5 font-weight-bold justify-center white--text">
+          SNS 로그인
+        </v-card-title>
+  
+        <v-card-text>
+          <div class="text-center grey--text text--lighten-1 mb-4">
+            옵빠 bepl에 온걸 환영해!
+          </div>
+  
+          <v-btn
+            block
+            color="white"
+            class="mb-4 text-none d-flex align-center justify-start google-btn"
+            @click="googleLogin"
+          >
+            <v-img
+              src="@/assets/google_login.png"
+              alt="Google Logo"
+              height="24"
+              width="24"
+              class="mr-3"
+            />
+            <span class="black--text font-weight-medium">Google 계정으로 로그인</span>
+          </v-btn>
+  
+          <v-btn
+            block
+            color="#03c75a"
+            class="text-none d-flex align-center justify-start"
+            @click="naverLogin"
+          >
+            <v-img
+              src="@/assets/btnG_완성형.png"
+              alt="Naver Logo"
+              height="24"
+              width="24"
+              class="mr-3"
+            />
+            <span class="white--text font-weight-medium">Naver 계정으로 로그인</span>
+          </v-btn>
+        </v-card-text>
+      </v-card>
     </v-container>
 </template>
-
 <script>
 import axios from 'axios';
 
 export default{
     data(){
         return{
-            email : "",
-            password: "",
-
             googleUrl: "https://accounts.google.com/o/oauth2/v2/auth",
             googleClientId: "",
-
             googleRedirectUrl: "http://localhost:3000/member/google/redirect",
-            // openid는 요청하지 않아도 기본적으로 제공. email과 profile은 요청시 제공.
             googleScope: "openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.phonenumbers.read",
 
             naverUrl: "https://nid.naver.com/oauth2.0/authorize",

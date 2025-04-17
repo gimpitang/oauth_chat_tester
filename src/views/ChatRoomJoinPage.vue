@@ -14,6 +14,27 @@
                 <strong>{{ msg.sender }}:</strong> {{ msg.message }}
               </div>
             </div>
+            <!-- 기가 막히게 아래로 내려가는 버튼 -->
+            <v-btn
+              v-if="showScrollButton"
+              class="scroll-to-bottom-btn"
+              color="primary"
+              @click="scrollToBottom"
+            >
+              ⬇ 새 메시지 보기
+            </v-btn>
+            
+            <v-alert
+              v-if="newMessageNotice"
+              class="new-message-alert"
+              type="info"
+              dense
+              outlined
+              style="position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); z-index: 20;"
+            >
+              {{ newMessageNotice }}
+            </v-alert>
+
 
             <!-- 로그인한 사용자만 메시지 입력 -->
             <div v-if="isLogin">
@@ -51,6 +72,8 @@ export default {
       senderNickname: null,
       isLogin: false,
       isConnected: false,
+      showScrollButton: false,
+      newMessageNotice: null,
     };
   },
   // async created() {
@@ -84,6 +107,8 @@ export default {
   // },
   async created() {
     await this.prepareToken();
+    const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/streaming-service/chat/history/${this.roomId}`);
+    this.messages = response.data;
     await this.joinChatRoom();
     this.connectWebsocket();
   },
@@ -91,7 +116,20 @@ export default {
     this.disconnectWebSocket();
     next();
   },
+  mounted() {
+    this.$nextTick(() => {
+      const chatBox = this.$el.querySelector('.chat-box');
+      if (chatBox) {
+        chatBox.addEventListener('scroll', this.checkScrollPosition);
+      }
+    });
+  },
   beforeUnmount() {
+    const chatBox = this.$el.querySelector('.chat-box');
+    if (chatBox) {
+      chatBox.removeEventListener('scroll', this.checkScrollPosition);
+    }
+
     this.disconnectWebSocket();
   },
 //   methods: {
@@ -190,17 +228,39 @@ methods: {
           try {
             console.log('메시지 수신:', message.body);
             const parsed = JSON.parse(message.body);
-            this.messages.push(parsed);
+            this.messages.push(parsed);          
+
+            this.$nextTick(() => {
+              const chatBox = this.$el.querySelector('.chat-box');
+              if (!chatBox) return;
+
+              const isAtBottom =
+                chatBox.scrollTop + chatBox.clientHeight >= chatBox.scrollHeight - 50;
+
+              if (isAtBottom) {
+                this.scrollToBottom();
+                this.newMessageNotice = null;
+              } else {
+                this.showScrollButton = true;
+                this.newMessageNotice = parsed.message; // 새 메시지 보여줌
+              }
+            });
           } catch (err) {
             console.error("❌❌❌ 메시지 파싱 실패:", err, message);
           }
         });
       }, (err) => {
         console.error("❌❌❌ WebSocket 연결 실패:", err);
+        this.isConnected = false;
+
+        setTimeout(() => {
+        console.log("WebSocket 재연결 시도 중@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        this.connectWebsocket();
+        }, 3000);
       });
     },
     sendMessage() {
-      console.log('sendMessage() 호출 시작작');
+      console.log('sendMessage() 호출 시작');
 
       if (!this.newMessage.trim()) return;
       if (!this.stompClient || !this.stompClient.connected || !this.isConnected) {
@@ -213,21 +273,37 @@ methods: {
         type: 'TALK',
       };
 
-      this.stompClient.send(
-        `/publish/${this.roomId}`,
-        {
-          Authorization: `Bearer ${this.token}`
-        },
-        JSON.stringify(message)
-      );
+      const jsonMessage = JSON.stringify(message);
+      console.log("✅ 최종 전송 JSON 문자열:", jsonMessage);
+
+      this.stompClient.send( `/publish/${this.roomId}`, jsonMessage, { Authorization: `Bearer ${this.token}` } );
       console.log('메시지 전송 완료, 내용용:', message);
       this.newMessage = '';
+
+      this.scrollToBottom();
     },
     scrollToBottom() {
       this.$nextTick(() => {
         const chatBox = this.$el.querySelector('.chat-box');
-        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+        if (chatBox) {
+          chatBox.scrollTo({
+            top: chatBox.scrollHeight,
+            behavior: 'smooth'
+          });
+          this.showScrollButton = false;
+          this.newMessageNotice = null;
+        }
       });
+    },
+    checkScrollPosition() {
+      const chatBox = this.$el.querySelector('.chat-box');
+      if (!chatBox) return;
+
+      const threshold = 50; // 여유 범위
+      const nearBottom =
+        chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < threshold;
+
+      this.showScrollButton = !nearBottom;
     },
     disconnectWebSocket() {
       if (this.stompClient && this.stompClient.connected) {
@@ -235,6 +311,8 @@ methods: {
           console.log("WebSocket 연결 종료");
           this.isConnected = false;
         });
+      } else{
+        this.isConnected = false;
       }
     },
   },
@@ -256,5 +334,19 @@ methods: {
 }
 .received {
   text-align: left;
+}
+.scroll-to-bottom-btn {
+  position: absolute;
+  bottom: 80px; /* 채팅 입력창 위에 뜨게 */
+  right: 30px;
+  z-index: 10;
+}
+.scroll-to-bottom-btn {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 999;
+  opacity: 0.9;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
 }
 </style>
